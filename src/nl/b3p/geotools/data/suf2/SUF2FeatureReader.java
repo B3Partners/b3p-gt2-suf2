@@ -8,11 +8,8 @@ import nl.b3p.suf2.SUF2ParseException;
 import nl.b3p.suf2.records.SUF2Record;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import java.awt.Point;
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -20,14 +17,16 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import nl.b3p.suf2.SUF2Coordinate;
+import nl.b3p.suf2.SUF2Math;
 import nl.b3p.suf2.SUF2RecordCollector;
+import nl.b3p.suf2.records.SUF2Record05;
 import nl.b3p.suf2.records.SUF2Record06;
 import org.geotools.data.DataSourceException;
 import org.geotools.data.FeatureReader;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.opengis.referencing.crs.CRSFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.apache.commons.io.input.CountingInputStream;
 import org.geotools.feature.IllegalAttributeException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
@@ -73,7 +72,7 @@ public class SUF2FeatureReader implements FeatureReader {
         gf = new GeometryFactory();
 //        recordCollector = new SUF2RecordCollector(lnr);
 
-
+        recordCollector = new SUF2RecordCollector(url);
 
         //skipCommentsCheckEOF();
         createFeatureType(typeName, srs);
@@ -114,7 +113,7 @@ public class SUF2FeatureReader implements FeatureReader {
             //ftb.add("urlLink", String.class);
             ftb.add("entryLineNumber", Integer.class);
             ftb.add("parseError", Integer.class);
-            ftb.add("error", String.class);
+            ftb.add("angle", Double.class);
 
             ft = ftb.buildFeatureType();
 
@@ -182,7 +181,7 @@ public class SUF2FeatureReader implements FeatureReader {
                 SUF2Record record;
                 for (;;) {
                     // Loop till record with geometry is found
-                    record = (SUF2Record) recordCollector.next();
+                    record = recordCollector.next();
                     if (record.hasGeometry()) {
                         feature = createFeature(record);
                         break;
@@ -210,20 +209,29 @@ public class SUF2FeatureReader implements FeatureReader {
 
     private SimpleFeature createFeature(SUF2Record record) throws Exception {
         String key = "";
+        double angle = 0.0;
+
         Map properties = record.getProperties();
+        Geometry geometry = createGeometry(gf, record);
 
         if (properties.containsKey(SUF2Record06.TEKST)) {
             key = properties.get(SUF2Record06.TEKST).toString();
         }
 
+        if (properties.containsKey(SUF2Record06.ANGLE)) {
+            angle = (Double) properties.get(SUF2Record06.ANGLE);
+        }
+
+
+
 
         Object[] values = new Object[]{
-            createGeometry(gf, record),
+            geometry,
             "Naam",
             key,
             record.getLineNumber(),
             0,
-            "leeg"
+            angle
         };
 
         return SimpleFeatureBuilder.build(ft, values, Integer.toString(featureID++));
@@ -231,20 +239,36 @@ public class SUF2FeatureReader implements FeatureReader {
     }
 
     private Geometry createGeometry(GeometryFactory gf, SUF2Record record) throws Exception {
-        List<Point> coordinatePoints = record.getCoordinates();
+        List<SUF2Coordinate> coordinatePoints = record.getCoordinates();
         Coordinate[] coordinates = new Coordinate[coordinatePoints.size()];
+        Map properties = record.getProperties();
+
 
         for (int i = 0; i < coordinatePoints.size(); i++) {
-            Point point = coordinatePoints.get(i);
-            coordinates[i] = new Coordinate(point.x, point.y);
+            SUF2Coordinate coordinate = coordinatePoints.get(i);
+            coordinates[i] = new Coordinate(coordinate.getX() / 1000, coordinate.getY() / 1000);
+        }
+
+        // if isSymbol
+        if (properties.containsKey(SUF2Record05.TEKST_OF_SYMBOOL)) {
+            if (properties.get(SUF2Record05.TEKST_OF_SYMBOOL).toString().equals("2")) { // tekst = 1; symbool = 2
+                properties.put(SUF2Record06.TEKST, properties.get(SUF2Record05.SYMBOOLTYPE));
+            }
+        }
+
+        // if isText
+        if (properties.containsKey(SUF2Record06.TEKST)) {
+            SUF2Coordinate coordinate = SUF2Math.getMiddle(coordinatePoints);
+            return gf.createPoint(new Coordinate(coordinate.x / 1000, coordinate.y / 1000));
         }
 
 
         if (coordinates.length <= 0) {
             throw new IOException("No coordinates found");
-        } else if (coordinates.length == 1) {
 
+        } else if (coordinates.length == 1) {
             return gf.createPoint(coordinates[0]);
+
         } else {
             return gf.createLineString(coordinates);
         }
@@ -253,5 +277,4 @@ public class SUF2FeatureReader implements FeatureReader {
     public void close() throws IOException {
         recordCollector.close();
     }
-
 }
