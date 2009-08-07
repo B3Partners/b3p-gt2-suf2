@@ -51,16 +51,17 @@ public class SUF2GeometryFactory {
         if (coordinates.length <= 0) {
             throw new IOException("No coordinates found");
 
-            /*} else {
-            return gf.createPoint(coordinates[0]);
-            }
-            /**/
+//        } else {
+//            return gf.createPoint(coordinates[0]);
+//        }
+//        /*
         } else if (coordinates.length == 1) {
             return gf.createPoint(coordinates[0]);
 
         } else {
             return gf.createLineString(coordinates);
         }
+//        */
     }
 
     private static Geometry createArc(GeometryFactory gf, SUF2Record record, Coordinate[] coordinate2s) throws Exception {
@@ -94,3 +95,4 @@ public class SUF2GeometryFactory {
         return gf.createPoint(new Coordinate(coordinate.x, coordinate.y));
     }
 }
+
