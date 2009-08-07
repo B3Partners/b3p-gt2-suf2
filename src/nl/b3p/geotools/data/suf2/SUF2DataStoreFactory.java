@@ -1,9 +1,5 @@
-/*
- * $Id: SUF2DataStoreFactory.java 8672 2008-07-17 16:37:57Z Matthijs $
- */
 package nl.b3p.geotools.data.suf2;
 
-import nl.b3p.geotools.data.suf2.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
