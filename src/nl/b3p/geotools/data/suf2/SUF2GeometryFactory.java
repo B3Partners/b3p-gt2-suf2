@@ -37,7 +37,7 @@ public class SUF2GeometryFactory {
         // If text or symbol
         if (record.getType().equals(SUF2Record.Type.TEXT) || record.getType().equals(SUF2Record.Type.SYMBOL)) {
             if (record.getProperties().containsKey(SUF2Record05.TEKST_OF_SYMBOOL)) {
-                //return createTextPoint(gf, record);
+                return createTextPoint(gf, record);
             }
         }
 
@@ -75,39 +75,61 @@ public class SUF2GeometryFactory {
         double angle2 = Math.toRadians(SUF2Math.angle(pc, p2));
         double angle3 = Math.toRadians(SUF2Math.angle(pc, p3));
 
-        boolean beenhere = false;
+        /*
+         * G grootste getal
+         * M medium
+         * K kleinste getal
+         *
+         * Volgorde = angle1, angle2, angle3
+         */
 
-        if (angle1 == angle3) {
+        String type = "none";
+
+        record.getProperties().put(SUF2Record06.PERCEELNUMMER, "orig: angle1=" + Double.toString(angle1) + " angle2=" + Double.toString(angle2) + " angle3=" + Double.toString(angle3));
+
+        if (angle1 == angle3) { // G ? G
             angle1 = 0.0;
             angle3 = Math.PI * 2;
-        } else if (angle2 > angle1 && angle2 > angle1) {
-            //angle3 = angle1;
-//             //flip
+            type = "0";
+
+        } else if (angle1 < angle2 && angle2 > angle3 && angle1 > angle3) { // M G K
 //            double temp = angle1;
-//            angle1 = angle1;
-//            angle1 = temp + (Math.PI * 2);
-            angle3 += (Math.PI * 2);
-        } else {
+//            angle1 = angle3;
+            angle3 += Math.PI *2;
+
+            type = "1";
+
+        } else if (angle1 < angle2 && angle2 > angle3 && angle1 < angle3) { // K G M
+            double temp = angle1;
+            angle1 = angle3;
+            angle3 = temp + Math.PI * 2;
+            type = "2";
+
+        } else if (angle1 > angle2 && angle2 > angle3) { // G M K
+            double temp = angle1;
+            angle1 = angle3;
+            angle3 = temp;
+            type = "3";
+
+        } else if (angle1 > angle2 && angle2 < angle3 && angle3 < angle1) { // G K M
+            angle3 += Math.PI * 2;
+            type = "4";
+
+        } else if (angle1 > angle2 && angle2 < angle3 && angle3 > angle1) { // G K M
+            double temp = angle1;
+            angle1 = angle3;
+            angle3 = temp + Math.PI * 2;
+            type = "5";
         }
 
+        record.getProperties().put(SUF2Record06.GEMEENTECODE, "arctype = " + type);
         record.getProperties().put(SUF2Record06.TEKST, "angle1=" + Double.toString(angle1) + " angle2=" + Double.toString(angle2) + " angle3=" + Double.toString(angle3));
-        record.getProperties().put(SUF2Record06.GEMEENTECODE, (beenhere ? "true" : "false"));
 
-        if (angle1 > angle3) {
-            return gf.createLineString(toCoordinateArray(pc, radius, angle3, angle1, gf));
-        } else {
-            //return gf.createPoint(new Coordinate(pc.x, pc.y));
-
-
-            return gf.createLineString(toCoordinateArray(pc, radius, angle1, angle3, gf));
-        }
-
-
-
-        //return gf.createLineString(coordinate2s);
+        return gf.createLineString(toCoordinateArray(pc, radius, angle1, angle3, gf));
     }
 
-    private static Geometry createTextPoint(GeometryFactory gf, SUF2Record record) throws Exception {
+    private static Geometry createTextPoint(
+            GeometryFactory gf, SUF2Record record) throws Exception {
         Map properties = record.getProperties();
 
         List<SUF2Coordinate> coordinates = record.getCoordinates();
@@ -120,6 +142,7 @@ public class SUF2GeometryFactory {
             } else {
                 properties.put(SUF2Record06.TEKST, properties.get(SUF2Record05.SYMBOOLTYPE));
             }
+
         }
 
         SUF2Coordinate coordinate = SUF2Math.middle(coordinates);
@@ -136,7 +159,6 @@ public class SUF2GeometryFactory {
         x1 = c1.x;
         x2 = c2.x;
         x3 = c3.x;
-
         y1 = c1.y;
         y2 = c2.y;
         y3 = c3.y;
@@ -177,11 +199,6 @@ public class SUF2GeometryFactory {
             return new Coordinate[]{new Coordinate(0, 0), new Coordinate(1, 0)};
         }
 
-        if (startAngle > endAngle) {
-        }
-
-
-
         List<Coordinate> lc = new ArrayList<Coordinate>();
         //double segAngle = 2 * Math.PI / radius;
         double segAngle = 1 / (2 * Math.PI);
@@ -208,7 +225,13 @@ public class SUF2GeometryFactory {
             if (angle > endAngle) {
                 angle = endAngle;
             }
+
         }
+
+        if (lc.size() <= 1) {
+            int z = 0;
+        }
+
         return lc.toArray(new Coordinate[]{});
     }
 }

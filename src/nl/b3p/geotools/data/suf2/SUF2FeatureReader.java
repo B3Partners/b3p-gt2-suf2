@@ -145,33 +145,31 @@ public class SUF2FeatureReader implements FeatureReader {
     }
 
     private SimpleFeature createFeature(SUF2Record record) throws Exception {
-        String text = "";
-        String perceelnummer = "";
-        String gemeentecode = "";
-        String sectie = "";
-
-
-        String classificatiecode = "";
+        String text = null;
+        String perceelnummer = null;
+        String gemeentecode = null;
+        String sectie = null;
+        String classificatiecode = null;
         double angle = 0.0;
 
         Map properties = record.getProperties();
         Geometry geometry = SUF2GeometryFactory.createGeometry(gf, record);
 
 
-        if(record.getType()== SUF2Record.Type.PERCEEL){
-            perceelnummer = properties.get(SUF2Record06.PERCEELNUMMER).toString();
-            sectie = properties.get(SUF2Record06.SECTIE).toString();
-            gemeentecode = properties.get(SUF2Record06.GEMEENTECODE).toString();
+//        if(record.getType()== SUF2Record.Type.PERCEEL){
+            perceelnummer = (String)properties.get(SUF2Record06.PERCEELNUMMER);
+            sectie = (String)properties.get(SUF2Record06.SECTIE);
+            gemeentecode = (String)properties.get(SUF2Record06.GEMEENTECODE);
             text = perceelnummer + " " + sectie + " " + gemeentecode;
-        }
+//        }
 
-        if (properties.containsKey(SUF2Record06.TEKST)) {
-            text = properties.get(SUF2Record06.TEKST).toString();
-        }
+        //if (properties.containsKey(SUF2Record06.TEKST)) {
+            text = (String)properties.get(SUF2Record06.TEKST);
+        //}
 
-        if (properties.containsKey(SUF2Record.LKI_CLASSIFICATIECODE)) {
-            classificatiecode = properties.get(SUF2Record.LKI_CLASSIFICATIECODE).toString();
-        }
+//        if (properties.containsKey(SUF2Record.LKI_CLASSIFICATIECODE)) {
+            classificatiecode = (String)properties.get(SUF2Record.LKI_CLASSIFICATIECODE);
+//        }
 
         if (properties.containsKey(SUF2Record06.ANGLE)) {
             angle = (Double) properties.get(SUF2Record06.ANGLE);
