@@ -1,8 +1,8 @@
 package nl.b3p.geotools.data.suf2;
 
-import nl.b3p.suf2.SUF2ParseException;
 import java.io.IOException;
 import java.net.URL;
+import nl.b3p.suf2.SUF2ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.geotools.data.AbstractFileDataStore;
@@ -39,7 +39,7 @@ public class SUF2DataStore extends AbstractFileDataStore {
             if (i != -1) {
                 file = file.substring(i + 1);
             }
-            if (file.toLowerCase().endsWith(".nen")) {
+            if (file.toLowerCase().endsWith(".nen") || file.toLowerCase().endsWith(".sfn")) {
                 file = file.substring(0, file.length() - 4);
             }
             return file;

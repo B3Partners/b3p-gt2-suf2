@@ -86,9 +86,12 @@ public class SUF2FeatureReader implements FeatureReader {
             ftb.add("the_geom", Geometry.class);
             ftb.add("type", String.class);
             ftb.add("classificatie", String.class);
-            ftb.add("value", String.class);
+            ftb.add("text", String.class);
             ftb.add("entryLineNumber", Integer.class);
             ftb.add("angle", Double.class);
+            ftb.add("gemeentecode", String.class);
+            ftb.add("sectie", String.class);
+            ftb.add("perceelnummer", String.class);
 
             ft = ftb.buildFeatureType();
 
@@ -142,15 +145,28 @@ public class SUF2FeatureReader implements FeatureReader {
     }
 
     private SimpleFeature createFeature(SUF2Record record) throws Exception {
-        String value = "";
+        String text = "";
+        String perceelnummer = "";
+        String gemeentecode = "";
+        String sectie = "";
+
+
         String classificatiecode = "";
         double angle = 0.0;
 
         Map properties = record.getProperties();
         Geometry geometry = SUF2GeometryFactory.createGeometry(gf, record);
 
+
+        if(record.getType()== SUF2Record.Type.PERCEEL){
+            perceelnummer = properties.get(SUF2Record06.PERCEELNUMMER).toString();
+            sectie = properties.get(SUF2Record06.SECTIE).toString();
+            gemeentecode = properties.get(SUF2Record06.GEMEENTECODE).toString();
+            text = perceelnummer + " " + sectie + " " + gemeentecode;
+        }
+
         if (properties.containsKey(SUF2Record06.TEKST)) {
-            value = properties.get(SUF2Record06.TEKST).toString();
+            text = properties.get(SUF2Record06.TEKST).toString();
         }
 
         if (properties.containsKey(SUF2Record.LKI_CLASSIFICATIECODE)) {
@@ -165,9 +181,12 @@ public class SUF2FeatureReader implements FeatureReader {
             geometry, //the_geom
             record.getType().getDescription(),
             classificatiecode, //classificatie
-            value,// value
+            text,// text
             record.getLineNumber(), // record linenumber
-            angle // text angle
+            angle, // text angle
+            gemeentecode,
+            sectie,
+            perceelnummer
         };
 
         return SimpleFeatureBuilder.build(ft, values, Integer.toString(featureID++));

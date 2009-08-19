@@ -31,14 +31,14 @@ public class SUF2DataStoreFactory implements FileDataStoreFactorySpi {
     }
 
     public String[] getFileExtensions() {
-        return new String[]{".nen"};
+        return new String[]{".nen", ".sfn"};
     }
 
     /**
      * @return true if the file of the f parameter exists
      */
     public boolean canProcess(URL f) {
-        return f.getFile().toLowerCase().endsWith(".nen");
+        return f.getFile().toLowerCase().endsWith(".nen") || f.getFile().toLowerCase().endsWith(".sfn");
     }
 
     /**
