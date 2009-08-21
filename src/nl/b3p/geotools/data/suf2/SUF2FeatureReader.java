@@ -17,6 +17,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import nl.b3p.suf2.SUF2RecordCollector;
 import nl.b3p.suf2.records.SUF2Record06;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.geotools.data.DataSourceException;
 import org.geotools.data.FeatureReader;
 import org.geotools.referencing.ReferencingFactoryFinder;
@@ -34,23 +36,18 @@ import org.opengis.feature.simple.SimpleFeatureType;
  */
 public class SUF2FeatureReader implements FeatureReader {
 
+    private static final Log log = LogFactory.getLog(SUF2DataStore.class);
     private GeometryFactory gf;
     private SimpleFeatureType ft;
-//    private CountingInputStream cis;
-//    private LineNumberReader lnr;
-    // private String version;
     private Map<String, String[]> metadata = new HashMap<String, String[]>();
     private int featureID = 0;
     private SUF2RecordCollector recordCollector;
-    //private Map header;
     private SimpleFeature feature;
     private SortedMap info = new TreeMap();
 
     public SUF2FeatureReader(URL url, String typeName, String srs) throws IOException, SUF2ParseException {
-
         gf = new GeometryFactory();
         recordCollector = new SUF2RecordCollector(url);
-
         createFeatureType(typeName, srs);
     }
 
@@ -120,8 +117,17 @@ public class SUF2FeatureReader implements FeatureReader {
                     // Loop till record with geometry is found
                     record = recordCollector.next();
                     if (record.hasGeometry()) {
-                        feature = createFeature(record);
-                        break;
+                        boolean error = false;
+                        try {
+                            feature = createFeature(record);
+                        } catch (Exception ex) {
+                            log.debug("Exception in record " + record.getLineNumber() + "; " + ex.getLocalizedMessage());
+                            error = true;
+                        } finally {
+                            if (!error) {
+                                break;
+                            }
+                        }
                     } else {
                         // Record contains file information
                         try {
@@ -138,48 +144,37 @@ public class SUF2FeatureReader implements FeatureReader {
             }
         } catch (EOFException ex) {
             return false;
+
         } catch (Exception ex) {
+            log.error(ex);
             throw new IOException(ex);
         }
+
         return true;
     }
 
     private SimpleFeature createFeature(SUF2Record record) throws Exception {
-        String text = null;
-        String perceelnummer = null;
-        String gemeentecode = null;
-        String sectie = null;
-        String classificatiecode = null;
-        double angle = 0.0;
-
         Map properties = record.getProperties();
         Geometry geometry = SUF2GeometryFactory.createGeometry(gf, record);
 
+        String perceelnummer = (String) properties.get(SUF2Record06.PERCEELNUMMER);
+        String sectie = (String) properties.get(SUF2Record06.SECTIE);
+        String gemeentecode = (String) properties.get(SUF2Record06.GEMEENTECODE);
+        String text = (String) properties.get(SUF2Record06.TEKST);
+        String classificatiecode = (String) properties.get(SUF2Record.LKI_CLASSIFICATIECODE);
 
-//        if(record.getType()== SUF2Record.Type.PERCEEL){
-            perceelnummer = (String)properties.get(SUF2Record06.PERCEELNUMMER);
-            sectie = (String)properties.get(SUF2Record06.SECTIE);
-            gemeentecode = (String)properties.get(SUF2Record06.GEMEENTECODE);
-            text = perceelnummer + " " + sectie + " " + gemeentecode;
-//        }
-
-        //if (properties.containsKey(SUF2Record06.TEKST)) {
-            text = (String)properties.get(SUF2Record06.TEKST);
-        //}
-
-//        if (properties.containsKey(SUF2Record.LKI_CLASSIFICATIECODE)) {
-            classificatiecode = (String)properties.get(SUF2Record.LKI_CLASSIFICATIECODE);
-//        }
-
+        double angle;
         if (properties.containsKey(SUF2Record06.ANGLE)) {
             angle = (Double) properties.get(SUF2Record06.ANGLE);
+        } else {
+            angle = 0.0;
         }
 
         Object[] values = new Object[]{
             geometry, //the_geom
-            record.getType().getDescription(),
-            classificatiecode, //classificatie
-            text,// text
+            record.getType().getDescription(), // Recordtype in plain text
+            classificatiecode,
+            text,// text (usually label)
             record.getLineNumber(), // record linenumber
             angle, // text angle
             gemeentecode,
