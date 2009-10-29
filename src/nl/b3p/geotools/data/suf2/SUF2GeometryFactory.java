@@ -66,16 +66,19 @@ public class SUF2GeometryFactory {
         }
     }
 
-    private static Geometry createArc(GeometryFactory gf, SUF2Record record) throws Exception {
+    public static Geometry createArc(GeometryFactory gf, SUF2Record record) throws Exception {
         List<SUF2Coordinate> coordinates = record.getCoordinates();
+        return createArc(gf, coordinates);
+    }
 
+    public static Geometry createArc(GeometryFactory gf, List<SUF2Coordinate> coordinates) throws Exception {
         SUF2Coordinate p1 = coordinates.get(0);
         SUF2Coordinate p2 = coordinates.get(1);
         SUF2Coordinate p3 = coordinates.get(2);
 
         SUF2Coordinate pc;
         try {
-            pc = circle(record.getCoordinates());
+            pc = circle(coordinates);
         } catch (Exception ex) {
             log.debug(ex.getLocalizedMessage() + "; converted arc to line");
             return gf.createLineString(new Coordinate[]{new Coordinate(p1.x, p1.y), new Coordinate(p3.x, p3.y)});
@@ -92,7 +95,8 @@ public class SUF2GeometryFactory {
             angle3 = Math.PI * 2;
 
         } else if (angle2 == angle1 || angle2 == angle3) {
-            log.debug("Record at line " + record.getLineNumber() + ": Arc with middleCoordinate equal to startCoordinate or endCoordinate");
+            //log.debug("Record at line " + record.getLineNumber() + ": Arc with middleCoordinate equal to startCoordinate or endCoordinate");
+            log.debug("Record at line someline: Arc with middleCoordinate equal to startCoordinate or endCoordinate");
 
             Coordinate[] line = new Coordinate[]{new Coordinate(p1.x, p1.y), new Coordinate(p3.x, p3.y)};
             return gf.createLineString(line);
