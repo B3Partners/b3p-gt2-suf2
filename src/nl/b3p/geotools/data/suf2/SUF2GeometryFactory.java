@@ -1,8 +1,11 @@
 package nl.b3p.geotools.data.suf2;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +13,7 @@ import java.util.Map;
 import nl.b3p.suf2.SUF2Coordinate;
 import nl.b3p.suf2.SUF2Math;
 import nl.b3p.suf2.records.SUF2Record;
+import nl.b3p.suf2.records.SUF2Record.Type;
 import nl.b3p.suf2.records.SUF2Record05;
 import nl.b3p.suf2.records.SUF2Record06;
 import org.apache.commons.logging.Log;
@@ -38,14 +42,12 @@ public class SUF2GeometryFactory {
             coordinates[i] = new Coordinate(coordinate.x, coordinate.y);
         }
 
-
         // If text or symbol
         if (record.getType().equals(SUF2Record.Type.TEXT) || record.getType().equals(SUF2Record.Type.SYMBOL)) {
             if (record.getProperties().containsKey(SUF2Record05.TEKST_OF_SYMBOOL)) {
                 return createTextPoint(gf, record);
             }
         }
-
 
         // If lineStart == lineEnd; convert to point
         if (coordinates.length == 2) {
@@ -54,15 +56,31 @@ public class SUF2GeometryFactory {
             }
         }
 
-
         if (coordinates.length <= 0) {
             throw new IOException("No coordinates found");
 
         } else if (coordinates.length == 1) {
             return gf.createPoint(coordinates[0]);
 
+        } else if (isPolygon(record, coordinatePoints)) {
+            CoordinateSequence coordinateSequence = new CoordinateArraySequence(coordinates);
+            LinearRing linearRing = new LinearRing(coordinateSequence, gf);
+            return gf.createPolygon(linearRing, new LinearRing[0]);
         } else {
             return gf.createLineString(coordinates);
+        }
+    }
+
+    private static boolean isPolygon(SUF2Record record, List<SUF2Coordinate> coordinatePoints) {
+        if (record.getType() == Type.POLYGON) {
+            return true;
+        } else {
+            if (coordinatePoints.size() > 2) {
+                if (coordinatePoints.get(0).equals(coordinatePoints.get(coordinatePoints.size() - 1))) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
