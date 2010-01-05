@@ -4,7 +4,6 @@
 package nl.b3p.geotools.data.suf2;
 
 import nl.b3p.suf2.SUF2ParseException;
-import nl.b3p.suf2.records.SUF2Record;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import java.io.EOFException;
@@ -16,7 +15,7 @@ import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import nl.b3p.suf2.SUF2RecordCollector;
-import nl.b3p.suf2.records.SUF2Record06;
+import nl.b3p.suf2.records.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.geotools.data.DataSourceException;
@@ -44,6 +43,7 @@ public class SUF2FeatureReader implements FeatureReader {
     private SUF2RecordCollector recordCollector;
     private SimpleFeature feature;
     private SortedMap info = new TreeMap();
+    private int count = 0;
 
     public SUF2FeatureReader(URL url, String typeName, String srs) throws IOException, SUF2ParseException {
         gf = new GeometryFactory();
@@ -82,17 +82,61 @@ public class SUF2FeatureReader implements FeatureReader {
 
             ftb.add("the_geom", Geometry.class);
             ftb.add("type", String.class);
-            ftb.add("classificatie", String.class);
-            ftb.add("text", String.class);
-            ftb.add("entryLineNumber", Integer.class);
-            ftb.add("angle", Double.class);
-            ftb.add("gemeentecode", String.class);
-            ftb.add("sectie", String.class);
-            ftb.add("perceelnummer", String.class);
 
+            ftb.add(SUF2Record.RECORDTYPE, String.class);
+            ftb.add(SUF2Record.LKI_CLASSIFICATIECODE, String.class);
+            ftb.add(SUF2Record.ANGLE, Double.class);
+            ftb.add(SUF2Record01.BESTANDSIDENTIFICATIE, String.class);
+            ftb.add(SUF2Record01.VOLLEDIG_OF_MUTATIE, String.class);
+            ftb.add(SUF2Record01.DATUM_HERZIENING, String.class);
+            ftb.add(SUF2Record01.DATUM_ACTUALITEIT, String.class);
+            ftb.add(SUF2Record01.UITWISSELING_DEELBESTANDEN, String.class);
+            ftb.add(SUF2Record01.UITWISSELING_DEELBESTANDEN_HUIDIG, String.class);
+            ftb.add(SUF2Record01.BESTANDSNAAM, String.class);
+            ftb.add(SUF2Record02.RD, String.class);
+            ftb.add(SUF2Record02.LKI, String.class);
+            ftb.add(SUF2Record02.COORD_MILLIMETERS, String.class);
+            ftb.add(SUF2Record02.RICHTINGEN_MICROGON, String.class);
+            ftb.add(SUF2Record02.LKI_SYMBOOL, String.class);
+            ftb.add(SUF2Record02.NAP, String.class);
+            ftb.add(SUF2Record02.HEEFT_OPTEL_X, String.class);
+            ftb.add(SUF2Record02.HEEFT_OPTEL_Y, String.class);
+            ftb.add(SUF2Record02.HEEFT_OPTEL_Z, String.class);
+            ftb.add(SUF2Record02.VERMENIGVULDIGINGSCONSTANTE_XY, String.class);
+            ftb.add(SUF2Record02.VERMENIGVULDIGINGSCONSTANTE_Z, String.class);
+            /*ftb.add(SUF2Record03.ORIENTATIEGEMEENTECODE, String.class);
+            ftb.add(SUF2Record03.ORIENTATIESECTIELETTER, String.class);
+            ftb.add(SUF2Record03.ORIENTATIEPERCEELNUMMER, String.class);*/
+            ftb.add(SUF2Record03.ORIENTATIETOVPERCEEL, String.class);
+            ftb.add(SUF2Record03.INDEXLETTER_PERCEELNUMMER, String.class);
+            ftb.add(SUF2Record03.INDEXNUMMER_PERCEELNUMMER, String.class);
+            ftb.add(SUF2Record03.G_STRINGSOORT, String.class);
+            ftb.add(SUF2Record03.G_ZICHTBAARHEID, String.class);
+            ftb.add(SUF2Record03.G_INWINNING, String.class);
+            ftb.add(SUF2Record03.G_STATUS_VAN_OBJECT, String.class);
+            ftb.add(SUF2Record03.D_OPNAMEDATUM, String.class);
+            ftb.add(SUF2Record03.B_BRONVERMELDING, String.class);
+            ftb.add(SUF2Record03.B_WIJZE_VERZEKERING, String.class);
+            ftb.add(SUF2Record04.I_COORD_FUNCTIE, String.class);
+            ftb.add(SUF2Record04.Q_PRECISIEKLASSE, String.class);
+            ftb.add(SUF2Record04.Q_IDEALISATIEKLASSE, String.class);
+            ftb.add(SUF2Record04.Q_BETROUWBAARHEID, String.class);
+            ftb.add(SUF2Record05.TEXT_ALIGN, String.class);
+            ftb.add(SUF2Record05.STATUS_PERCEEL, String.class);
+            ftb.add(SUF2Record05.TEKST_OF_SYMBOOL, String.class);
+            ftb.add(SUF2Record05.SYMBOOLTYPE, String.class);
+            ftb.add(SUF2Record06.VELDLENGTE, String.class);
+            ftb.add(SUF2Record06.TEKST, String.class);
+            ftb.add(SUF2Record06.GEMEENTECODE, String.class);
+            ftb.add(SUF2Record06.SECTIE, String.class);
+            ftb.add(SUF2Record06.PERCEELNUMMER, String.class);
+            ftb.add(SUF2Record06.INDEXLETTER, String.class);
+            ftb.add(SUF2Record06.INDEXNUMMER, String.class);
+            ftb.add(SUF2Record.ID, Integer.class);
             ft = ftb.buildFeatureType();
 
         } catch (Exception e) {
+            log.error("Error creating SimpleFeature",e);
             throw new DataSourceException("Error creating SimpleFeatureType", e);
         }
     }
@@ -155,31 +199,61 @@ public class SUF2FeatureReader implements FeatureReader {
 
     private SimpleFeature createFeature(SUF2Record record) throws Exception {
         Map properties = record.getProperties();
-        Geometry geometry = SUF2GeometryFactory.createGeometry(gf, record);
-
-        String perceelnummer = (String) properties.get(SUF2Record06.PERCEELNUMMER);
-        String sectie = (String) properties.get(SUF2Record06.SECTIE);
-        String gemeentecode = (String) properties.get(SUF2Record06.GEMEENTECODE);
-        String text = (String) properties.get(SUF2Record06.TEKST);
-        String classificatiecode = (String) properties.get(SUF2Record.LKI_CLASSIFICATIECODE);
-
-        double angle;
-        if (properties.containsKey(SUF2Record06.ANGLE)) {
-            angle = (Double) properties.get(SUF2Record06.ANGLE);
-        } else {
-            angle = 0.0;
-        }
 
         Object[] values = new Object[]{
-            geometry, //the_geom
+            SUF2GeometryFactory.createGeometry(gf, record), //the_geom
             record.getType().getDescription(), // Recordtype in plain text
-            classificatiecode,
-            text,// text (usually label)
-            record.getLineNumber(), // record linenumber
-            angle, // text angle
-            gemeentecode,
-            sectie,
-            perceelnummer
+
+            (String) properties.get(SUF2Record.RECORDTYPE),
+            (String) properties.get(SUF2Record.LKI_CLASSIFICATIECODE),
+            (properties.containsKey(SUF2Record06.ANGLE) ? (Double) properties.get(SUF2Record06.ANGLE) : new Double(0.0)),
+            (String) properties.get(SUF2Record01.BESTANDSIDENTIFICATIE),
+            (String) properties.get(SUF2Record01.VOLLEDIG_OF_MUTATIE),
+            (String) properties.get(SUF2Record01.DATUM_HERZIENING),
+            (String) properties.get(SUF2Record01.DATUM_ACTUALITEIT),
+            (String) properties.get(SUF2Record01.UITWISSELING_DEELBESTANDEN),
+            (String) properties.get(SUF2Record01.UITWISSELING_DEELBESTANDEN_HUIDIG),
+            (String) properties.get(SUF2Record01.BESTANDSNAAM),
+            (String) properties.get(SUF2Record02.RD),
+            (String) properties.get(SUF2Record02.LKI),
+            (String) properties.get(SUF2Record02.COORD_MILLIMETERS),
+            (String) properties.get(SUF2Record02.RICHTINGEN_MICROGON),
+            (String) properties.get(SUF2Record02.LKI_SYMBOOL),
+            (String) properties.get(SUF2Record02.NAP),
+            (String) properties.get(SUF2Record02.HEEFT_OPTEL_X),
+            (String) properties.get(SUF2Record02.HEEFT_OPTEL_Y),
+            (String) properties.get(SUF2Record02.HEEFT_OPTEL_Z),
+            (String) properties.get(SUF2Record02.VERMENIGVULDIGINGSCONSTANTE_XY),
+            (String) properties.get(SUF2Record02.VERMENIGVULDIGINGSCONSTANTE_Z),
+            /*(String) properties.get(SUF2Record03.ORIENTATIEGEMEENTECODE),
+            (String) properties.get(SUF2Record03.ORIENTATIESECTIELETTER),
+            (String) properties.get(SUF2Record03.ORIENTATIEPERCEELNUMMER),*/
+            (String) properties.get(SUF2Record03.ORIENTATIETOVPERCEEL),
+            (String) properties.get(SUF2Record03.INDEXLETTER_PERCEELNUMMER),
+            (String) properties.get(SUF2Record03.INDEXNUMMER_PERCEELNUMMER),
+            (String) properties.get(SUF2Record03.G_STRINGSOORT),
+            (String) properties.get(SUF2Record03.G_ZICHTBAARHEID),
+            (String) properties.get(SUF2Record03.G_INWINNING),
+            (String) properties.get(SUF2Record03.G_STATUS_VAN_OBJECT),
+            (String) properties.get(SUF2Record03.D_OPNAMEDATUM),
+            (String) properties.get(SUF2Record03.B_BRONVERMELDING),
+            (String) properties.get(SUF2Record03.B_WIJZE_VERZEKERING),
+            (String) properties.get(SUF2Record04.I_COORD_FUNCTIE),
+            (String) properties.get(SUF2Record04.Q_PRECISIEKLASSE),
+            (String) properties.get(SUF2Record04.Q_IDEALISATIEKLASSE),
+            (String) properties.get(SUF2Record04.Q_BETROUWBAARHEID),
+            (String) properties.get(SUF2Record05.TEXT_ALIGN),
+            (String) properties.get(SUF2Record05.STATUS_PERCEEL),
+            (String) properties.get(SUF2Record05.TEKST_OF_SYMBOOL),
+            (String) properties.get(SUF2Record05.SYMBOOLTYPE),
+            (String) properties.get(SUF2Record06.VELDLENGTE),
+            (String) properties.get(SUF2Record06.TEKST),
+            (String) properties.get(SUF2Record06.GEMEENTECODE),
+            (String) properties.get(SUF2Record06.SECTIE),
+            (String) properties.get(SUF2Record06.PERCEELNUMMER),
+            (String) properties.get(SUF2Record06.INDEXLETTER),
+            (String) properties.get(SUF2Record06.INDEXNUMMER),
+                    (Integer) record.getLineNumber()
         };
 
         return SimpleFeatureBuilder.build(ft, values, Integer.toString(featureID++));
