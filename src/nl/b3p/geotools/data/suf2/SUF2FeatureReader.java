@@ -43,7 +43,6 @@ public class SUF2FeatureReader implements FeatureReader {
     private SUF2RecordCollector recordCollector;
     private SimpleFeature feature;
     private SortedMap info = new TreeMap();
-    private int count = 0;
 
     public SUF2FeatureReader(URL url, String typeName, String srs) throws IOException, SUF2ParseException {
         gf = new GeometryFactory();
@@ -150,7 +149,6 @@ public class SUF2FeatureReader implements FeatureReader {
     }
 
     public boolean hasNext() throws IOException {
-
         try {
             if (!recordCollector.hasNext()) {
                 return false;
