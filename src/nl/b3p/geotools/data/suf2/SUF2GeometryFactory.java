@@ -51,9 +51,7 @@ public class SUF2GeometryFactory {
 
         // If lineStart == lineEnd; convert to point
         if (coordinates.length == 2) {
-            if (coordinates[0].equals(coordinates[1])) {
-                return gf.createPoint(coordinates[0]);
-            } else if (record.getProperties().containsKey(SUF2Record05.TEKST_OF_SYMBOOL)) {
+            if (record.getProperties().containsKey(SUF2Record05.TEKST_OF_SYMBOOL)) {
                 if (record.getProperties().get(SUF2Record05.TEKST_OF_SYMBOOL).toString().equals("1")) {
                     return createTextPoint(gf, record);
                 }
@@ -164,9 +162,11 @@ public class SUF2GeometryFactory {
             } else {
                 properties.put(SUF2Record06.TEKST, properties.get(SUF2Record05.SYMBOOLTYPE));
             }
-        }else if(record.getType() == SUF2Record.Type.PERCEEL){
+        }else{
             if(properties.containsKey(SUF2Record06.PERCEELNUMMER)){
                 properties.put(SUF2Record06.TEKST, properties.get(SUF2Record06.PERCEELNUMMER));
+            }else{
+                properties.put(SUF2Record06.TEKST, properties.get(SUF2Record05.LKI_CLASSIFICATIECODE));
             }
         }
 
