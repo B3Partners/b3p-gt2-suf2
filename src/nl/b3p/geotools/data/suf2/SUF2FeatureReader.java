@@ -35,7 +35,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
  */
 public class SUF2FeatureReader implements FeatureReader {
 
-    private static final Log log = LogFactory.getLog(SUF2DataStore.class);
+    private static final Log log = LogFactory.getLog(SUF2FeatureReader.class);
     private GeometryFactory gf;
     private SimpleFeatureType ft;
     private Map<String, String[]> metadata = new HashMap<String, String[]>();
