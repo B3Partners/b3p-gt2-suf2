@@ -77,11 +77,12 @@ public class SUF2GeometryFactory {
         if (record.getType() == Type.POLYGON) {
             return true;
         } else {
-            if (coordinatePoints.size() > 2) {
+            /*Niet meer doen. Een gesloten lijn is geen polygon. Gebruik de Polygonize action om van lijnen polygonen te maken.
+             if (coordinatePoints.size() > 2) {
                 if (coordinatePoints.get(0).equals(coordinatePoints.get(coordinatePoints.size() - 1))) {
                     return true;
                 }
-            }
+            }*/
             return false;
         }
     }
