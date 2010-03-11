@@ -103,12 +103,18 @@ public class SUF2FeatureReader implements FeatureReader {
             ftb.add(SUF2Record02.HEEFT_OPTEL_Z, String.class);
             ftb.add(SUF2Record02.VERMENIGVULDIGINGSCONSTANTE_XY, String.class);
             ftb.add(SUF2Record02.VERMENIGVULDIGINGSCONSTANTE_Z, String.class);
-            /*ftb.add(SUF2Record03.ORIENTATIEGEMEENTECODE, String.class);
-            ftb.add(SUF2Record03.ORIENTATIESECTIELETTER, String.class);
-            ftb.add(SUF2Record03.ORIENTATIEPERCEELNUMMER, String.class);*/
-            ftb.add(SUF2Record03.ORIENTATIETOVPERCEEL, String.class);
-            ftb.add(SUF2Record03.INDEXLETTER_PERCEELNUMMER, String.class);
-            ftb.add(SUF2Record03.INDEXNUMMER_PERCEELNUMMER, String.class);
+
+            ftb.add(SUF2Record03.GEMEENTECODEPERCEELLINKS,String.class);
+            ftb.add(SUF2Record03.SECTIEPERCEELLINKS,String.class);
+            ftb.add(SUF2Record03.INDEXLETTERPERCEELLINKS,String.class);
+            ftb.add(SUF2Record03.PERCEELNUMMERLINKS,String.class);
+            ftb.add(SUF2Record03.INDEXNUMMERLINKS,String.class);
+            ftb.add(SUF2Record03.GEMEENTECODEPERCEELRECHTS,String.class);
+            ftb.add(SUF2Record03.SECTIEPERCEELRECHTS,String.class);
+            ftb.add(SUF2Record03.INDEXLETTERPERCEELRECHTS,String.class);
+            ftb.add(SUF2Record03.PERCEELNUMMERRECHTS,String.class);
+            ftb.add(SUF2Record03.INDEXNUMMERRECHTS,String.class);
+            
             ftb.add(SUF2Record03.G_STRINGSOORT, String.class);
             ftb.add(SUF2Record03.G_ZICHTBAARHEID, String.class);
             ftb.add(SUF2Record03.G_INWINNING, String.class);
@@ -223,12 +229,16 @@ public class SUF2FeatureReader implements FeatureReader {
             (String) properties.get(SUF2Record02.HEEFT_OPTEL_Z),
             (String) properties.get(SUF2Record02.VERMENIGVULDIGINGSCONSTANTE_XY),
             (String) properties.get(SUF2Record02.VERMENIGVULDIGINGSCONSTANTE_Z),
-            /*(String) properties.get(SUF2Record03.ORIENTATIEGEMEENTECODE),
-            (String) properties.get(SUF2Record03.ORIENTATIESECTIELETTER),
-            (String) properties.get(SUF2Record03.ORIENTATIEPERCEELNUMMER),*/
-            (String) properties.get(SUF2Record03.ORIENTATIETOVPERCEEL),
-            (String) properties.get(SUF2Record03.INDEXLETTER_PERCEELNUMMER),
-            (String) properties.get(SUF2Record03.INDEXNUMMER_PERCEELNUMMER),
+            (String) properties.get(SUF2Record03.GEMEENTECODEPERCEELLINKS),
+            (String) properties.get(SUF2Record03.SECTIEPERCEELLINKS),
+            (String) properties.get(SUF2Record03.INDEXLETTERPERCEELLINKS),
+            (String) properties.get(SUF2Record03.PERCEELNUMMERLINKS),
+            (String) properties.get(SUF2Record03.INDEXNUMMERLINKS),
+            (String) properties.get(SUF2Record03.GEMEENTECODEPERCEELRECHTS),
+            (String) properties.get(SUF2Record03.SECTIEPERCEELRECHTS),
+            (String) properties.get(SUF2Record03.INDEXLETTERPERCEELRECHTS),
+            (String) properties.get(SUF2Record03.PERCEELNUMMERRECHTS),
+            (String) properties.get(SUF2Record03.INDEXNUMMERRECHTS),
             (String) properties.get(SUF2Record03.G_STRINGSOORT),
             (String) properties.get(SUF2Record03.G_ZICHTBAARHEID),
             (String) properties.get(SUF2Record03.G_INWINNING),
