@@ -122,7 +122,8 @@ public class SUF2GeometryFactory {
             Coordinate[] line = new Coordinate[]{new Coordinate(p1.x, p1.y), new Coordinate(p3.x, p3.y)};
             return gf.createLineString(line);
 
-        } else if (angle1 < angle2 && angle2 > angle3 && angle1 > angle3) { // M G K
+        } /*Niet de angles verwisselen. Dan wordt de arc in een andere richting getekend.
+else if (angle1 < angle2 && angle2 > angle3 && angle1 > angle3) { // M G K
             angle3 += Math.PI * 2;
 
         } else if (angle1 < angle2 && angle2 > angle3 && angle1 < angle3) { // K G M
@@ -142,7 +143,7 @@ public class SUF2GeometryFactory {
             double temp = angle1;
             angle1 = angle3;
             angle3 = temp + Math.PI * 2;
-        }
+        }*/
 
         return gf.createLineString(toCoordinateArray(pc, radius, angle1, angle3, gf));
     }
@@ -226,6 +227,9 @@ public class SUF2GeometryFactory {
         } else if (radius <= 0) {
             throw new Exception("toCoordinateArray(...) radius is equal or below zero (radius=" + radius + ")");
         }
+        /*zijn de angles clockwise (cw) of counterclockwise (ccw). Dit bepaalt of de radius segment angle
+        moet oplopen of aflopen*/
+        boolean ccw=startAngle < endAngle;
 
         List<Coordinate> lc = new ArrayList<Coordinate>();
         double segAngle = (2 * Math.PI) / NUM_SEGMENTS;
@@ -235,15 +239,28 @@ public class SUF2GeometryFactory {
             double x = point.x + radius * Math.cos(angle);
             double y = point.y + radius * Math.sin(angle);
             lc.add(new Coordinate(x, y));
+            //if ccw dan optellen
+            if (ccw){
+                if (angle >= endAngle) {
+                    break;
+                }
 
-            if (angle >= endAngle) {
-                break;
-            }
+                angle += segAngle;
+                if (angle > endAngle) {
+                    // snap arc to endAngle
+                    angle = endAngle;
+                }
+            //anders aftrekken
+            }else{
+                if (angle <= endAngle) {
+                    break;
+                }
 
-            angle += segAngle;
-            if (angle > endAngle) {
-                // snap arc to endAngle
-                angle = endAngle;
+                angle -= segAngle;
+                if (angle < endAngle) {
+                    // snap arc to endAngle
+                    angle = endAngle;
+                }
             }
 
         }
