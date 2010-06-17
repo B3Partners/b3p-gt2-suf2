@@ -122,8 +122,19 @@ public class SUF2GeometryFactory {
             Coordinate[] line = new Coordinate[]{new Coordinate(p1.x, p1.y), new Coordinate(p3.x, p3.y)};
             return gf.createLineString(line);
 
-        } /*Niet de angles verwisselen. Dan wordt de arc in een andere richting getekend.
-else if (angle1 < angle2 && angle2 > angle3 && angle1 > angle3) { // M G K
+        }
+        /*als hoek2 niet tussen hoek 1 en 3 ligt dan betekent dat, dat 2PI lijn(0/360 graden lijn) tussen
+        punt 1 en 3 ligt en daarom de kleinste van de 2 moet worden opgehoogt met 2PI(360 graden)*/
+        else if ((angle2 > angle1 && angle2 > angle3) ||
+                (angle2 < angle1 && angle2 <angle3)){
+            if (angle1 < angle3)
+                angle1+= Math.PI*2;
+            else
+                angle3+= Math.PI*2;
+        }
+        /*Niet de angles verwisselen. Dan wordt de arc in een andere richting getekend.
+           */
+        /*else if (angle1 < angle2 && angle2 > angle3 && angle1 > angle3) { // M G K
             angle3 += Math.PI * 2;
 
         } else if (angle1 < angle2 && angle2 > angle3 && angle1 < angle3) { // K G M

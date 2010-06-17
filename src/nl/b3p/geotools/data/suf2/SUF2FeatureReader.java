@@ -6,6 +6,7 @@ package nl.b3p.geotools.data.suf2;
 import nl.b3p.suf2.SUF2ParseException;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.URL;
@@ -45,7 +46,7 @@ public class SUF2FeatureReader implements FeatureReader {
     private SortedMap info = new TreeMap();
 
     public SUF2FeatureReader(URL url, String typeName, String srs) throws IOException, SUF2ParseException {
-        gf = new GeometryFactory();
+        gf = new GeometryFactory(new PrecisionModel(0.001),28992);
         recordCollector = new SUF2RecordCollector(url);
         createFeatureType(typeName, srs);
     }
