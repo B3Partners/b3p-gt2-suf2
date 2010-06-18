@@ -30,6 +30,7 @@ import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.referencing.CRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.geometry.PrecisionType;
 
 /**
  * @author Gertjan Al, B3Partners
@@ -46,7 +47,7 @@ public class SUF2FeatureReader implements FeatureReader {
     private SortedMap info = new TreeMap();
 
     public SUF2FeatureReader(URL url, String typeName, String srs) throws IOException, SUF2ParseException {
-        gf = new GeometryFactory(new PrecisionModel(0.001),28992);
+        gf = new GeometryFactory();
         recordCollector = new SUF2RecordCollector(url);
         createFeatureType(typeName, srs);
     }
