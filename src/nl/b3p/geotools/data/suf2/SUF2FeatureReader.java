@@ -47,7 +47,7 @@ public class SUF2FeatureReader implements FeatureReader {
     private SortedMap info = new TreeMap();
 
     public SUF2FeatureReader(URL url, String typeName, String srs) throws IOException, SUF2ParseException {
-        gf = new GeometryFactory(new PrecisionModel(1000));
+        gf = new GeometryFactory(new PrecisionModel(100));
         recordCollector = new SUF2RecordCollector(url);
         createFeatureType(typeName, srs);
     }
