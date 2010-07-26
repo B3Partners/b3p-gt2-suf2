@@ -60,14 +60,12 @@ public class SUF2DataStore extends AbstractFileDataStore {
         return getFeatureReader();
     }
 
-    public FeatureReader getFeatureReader() throws IOException {
-        if (featureReader == null) {
-            try {
-                featureReader = new SUF2FeatureReader(url, typename, srs);
-            } catch (SUF2ParseException e) {
-                throw new IOException("SUF2 parse exception" + e.getLocalizedMessage());
-            }
+    public FeatureReader getFeatureReader() throws IOException {        
+        try {
+            featureReader = new SUF2FeatureReader(url, typename, srs);
+            return featureReader;
+        } catch (SUF2ParseException e) {
+            throw new IOException("SUF2 parse exception" + e.getLocalizedMessage());
         }
-        return featureReader;
     }
 }
