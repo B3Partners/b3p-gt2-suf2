@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>nl.b3p</groupId>
     <artifactId>b3p-gt2-suf2</artifactId>
-    <version>4.2.2-SNAPSHOT</version>
+    <version>4.2.2</version>
     <packaging>jar</packaging>
     
     <properties>
@@ -49,7 +49,7 @@
         <connection>scm:git:git@github.com:B3Partners/b3p-gt2-suf2.git</connection>
         <developerConnection>scm:git:git@github.com:B3Partners/b3p-gt2-suf2.git</developerConnection>
         <url>https://github.com/B3Partners/b3p-gt2-suf2</url>
-      <tag>b3p-gt2-suf2-${project.version}</tag>
+      <tag>b3p-gt2-suf2-4.2.2</tag>
     </scm>
     <distributionManagement>
         <repository>
