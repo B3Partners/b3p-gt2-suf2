@@ -5,8 +5,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import nl.b3p.suf2.SUF2ParseException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -176,8 +174,8 @@ public class SUF2DataStore implements FileDataStore {
     public void dispose() {
         try {
             this.featureReader.close();
-        } catch (IOException ex) {
-            // ignore
+        } catch (IOException | NullPointerException ex) {
+            log.debug("Mogelijk probleem met sluiten van featureReader", ex);
         }
         this.featureReader = null;
     }
