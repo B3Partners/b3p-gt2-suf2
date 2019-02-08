@@ -4,9 +4,9 @@
 package nl.b3p.geotools.data.suf2;
 
 import nl.b3p.suf2.SUF2ParseException;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.URL;
